@@ -21,8 +21,17 @@ jobs:
       - name: Assemble app HTML
         shell: pwsh
         run: |
-          Get-Content app/index.html.part1, app/index.html.part2 | Set-Content -Encoding utf8 app/index.html
-          (Get-Item app/index.html).Length
+          $parts = @(
+            'app/p1c0.txt','app/p1c1.txt','app/p1c2.txt',
+            'app/p2c0.txt','app/p2c1.txt','app/p2c2.txt'
+          )
+          Get-Content $parts -Raw | Set-Content -NoNewline -Encoding utf8 app/index.html
+          $bytes = [System.IO.File]::ReadAllBytes('app/index.html')
+          if ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) {
+            $bytes = $bytes[3..($bytes.Length-1)]
+            [System.IO.File]::WriteAllBytes('app/index.html', $bytes)
+          }
+          Write-Host "Assembled size:" (Get-Item app/index.html).Length
 
       - name: Install dependencies
         run: npm install
