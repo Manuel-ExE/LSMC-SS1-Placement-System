@@ -18,6 +18,12 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Assemble app HTML
+        shell: pwsh
+        run: |
+          Get-Content app/index.html.part1, app/index.html.part2 | Set-Content -Encoding utf8 app/index.html
+          (Get-Item app/index.html).Length
+
       - name: Install dependencies
         run: npm install
 
